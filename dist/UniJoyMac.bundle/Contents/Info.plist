@@ -18,7 +18,7 @@
   <string>1.0.0</string>
   <key>CFBundleVersion</key>
   <string>1</string>
-  <key>KLInfo_0</key>
+  <key>KLInfo_UniJoyMac</key>
   <dict>
     <key>KLKeyboardLayoutFile</key>
     <string>UniJoyMac.keylayout</string>

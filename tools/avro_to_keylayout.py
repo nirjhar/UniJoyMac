@@ -204,7 +204,8 @@ ACTION_OUTPUTS = set(ACTION_ID_BY_OUTPUT)
 
 # Non-character keys that should emit control characters in custom layouts.
 # Key code 51 (delete/backspace) is intentionally omitted: macOS handles it
-# natively, and U+007F is not a legal XML 1.0 character.
+# natively, and U+0008 is not a legal XML 1.0 character — its presence causes
+# macOS to silently reject the entire keylayout file.
 SPECIAL_KEYS = (
     {"code": 36, "output": "\r"},
     {"code": 48, "output": "\t"},
