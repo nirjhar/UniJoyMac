@@ -16,7 +16,7 @@ If `UniJoyMac-Installer.pkg` is present:
 open "dist/UniJoyMac-Installer.pkg"
 ```
 
-The installer installs to `/Library/Keyboard Layouts/`, refreshes keyboard layout discovery, and works on both Apple Silicon and Intel Macs.
+The installer installs to `/Library/Keyboard Layouts/`, refreshes keyboard layout discovery, prompts you to log out, and initiates logout when you confirm.
 
 To build a signed package before sharing:
 
@@ -61,7 +61,16 @@ System scope:
 bash "dist/verify.sh" --system
 ```
 
-If the layout does not appear, log out and log back in.
+If you chose **Later** in the installer prompt, log out and back in before adding the layout.
+
+If it still does not appear, run this full reset and reinstall flow:
+
+```bash
+rm -rf "$HOME/Library/Keyboard Layouts/UniJoyMac.bundle"
+sudo rm -rf "/Library/Keyboard Layouts/UniJoyMac.bundle"
+bash "tools/build_installer.sh"
+open "dist/UniJoyMac-Installer.pkg"
+```
 
 ## Manual test checklist (TextEdit)
 

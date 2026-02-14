@@ -2,14 +2,65 @@
 set -euo pipefail
 
 TARGET_DIR="/Library/Keyboard Layouts"
+BUNDLE_NAME="UniJoyMac.bundle"
+KEYLAYOUT_NAME="UniJoyMac.keylayout"
+ICON_NAME="UniJoyMac.icns"
+
+SYSTEM_BUNDLE="$TARGET_DIR/$BUNDLE_NAME"
+SYSTEM_KEYLAYOUT="$TARGET_DIR/$KEYLAYOUT_NAME"
+SYSTEM_ICON="$TARGET_DIR/$ICON_NAME"
 
 /usr/bin/touch "$TARGET_DIR"
 
-# Refresh relevant daemons so the new layout is picked up sooner.
-/usr/bin/killall TextInputMenuAgent >/dev/null 2>&1 || true
+CONSOLE_USER="$(/usr/bin/stat -f%Su /dev/console 2>/dev/null || true)"
+if [[ -n "$CONSOLE_USER" && "$CONSOLE_USER" != "root" ]]; then
+  USER_HOME="$(/usr/bin/dscl . -read "/Users/$CONSOLE_USER" NFSHomeDirectory 2>/dev/null | /usr/bin/awk '{print $2}')"
+  if [[ -n "$USER_HOME" ]]; then
+    USER_LAYOUT_DIR="$USER_HOME/Library/Keyboard Layouts"
+    USER_BUNDLE="$USER_LAYOUT_DIR/$BUNDLE_NAME"
+    USER_KEYLAYOUT="$USER_LAYOUT_DIR/$KEYLAYOUT_NAME"
+    USER_ICON="$USER_LAYOUT_DIR/$ICON_NAME"
+    if [[ -d "$USER_BUNDLE" ]]; then
+      rm -rf "$USER_BUNDLE"
+    fi
+    if [[ -f "$USER_KEYLAYOUT" ]]; then
+      rm -f "$USER_KEYLAYOUT"
+    fi
+    if [[ -f "$USER_ICON" ]]; then
+      rm -f "$USER_ICON"
+    fi
+    /bin/mkdir -p "$USER_LAYOUT_DIR"
+    if [[ -f "$SYSTEM_KEYLAYOUT" ]]; then
+      cp "$SYSTEM_KEYLAYOUT" "$USER_KEYLAYOUT"
+    fi
+    if [[ -f "$SYSTEM_ICON" ]]; then
+      cp "$SYSTEM_ICON" "$USER_ICON"
+    fi
+    if [[ -d "$SYSTEM_BUNDLE" ]]; then
+      COPYFILE_DISABLE=1 /usr/bin/ditto --norsrc "$SYSTEM_BUNDLE" "$USER_BUNDLE"
+    fi
+    /usr/sbin/chown -R "$CONSOLE_USER":staff "$USER_LAYOUT_DIR" >/dev/null 2>&1 || true
+    /usr/bin/touch "$USER_LAYOUT_DIR"
+  fi
+
+  USER_UID="$(/usr/bin/id -u "$CONSOLE_USER")"
+  /bin/launchctl asuser "$USER_UID" /usr/bin/killall TextInputMenuAgent >/dev/null 2>&1 || true
+  /bin/launchctl asuser "$USER_UID" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+  /bin/launchctl asuser "$USER_UID" /bin/launchctl kickstart -k "gui/$USER_UID/com.apple.TextInputMenuAgent" >/dev/null 2>&1 || true
+
+  LOGOUT_DIALOG_RESULT="$(/bin/launchctl asuser "$USER_UID" /usr/bin/osascript <<'APPLESCRIPT' 2>/dev/null || true
+display dialog "UniJoyMac was installed successfully.\n\nPlease save your work before continuing.\n\nmacOS usually requires logging out and back in before a new keyboard layout appears in Input Sources.\n\nLog out now?" buttons {"Later", "Log Out Now"} default button "Log Out Now" with icon note giving up after 45
+APPLESCRIPT
+)"
+
+  if [[ "$LOGOUT_DIALOG_RESULT" == *"button returned:Log Out Now"* ]] || [[ "$LOGOUT_DIALOG_RESULT" == *"gave up:true"* ]]; then
+    /bin/launchctl asuser "$USER_UID" /usr/bin/osascript -e 'tell application "System Events" to log out' >/dev/null 2>&1 || true
+  fi
+fi
+
 /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
 
 echo "UniJoyMac installed to $TARGET_DIR"
-echo "If it does not appear immediately, log out and log back in."
+echo "A logout prompt was shown to refresh Input Sources."
 
 exit 0

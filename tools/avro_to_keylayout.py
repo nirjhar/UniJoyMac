@@ -70,6 +70,14 @@ STATE_BY_AVRO_SUFFIX = {
 
 MODIFIER_ORDER = ["normal", "shift", "option", "option_shift"]
 
+# Non-character keys that must keep working in custom layouts.
+SPECIAL_KEYS = (
+    {"code": 36, "action": "insertNewline:"},
+    {"code": 48, "action": "insertTab:"},
+    {"code": 49, "output": " "},
+    {"code": 51, "action": "deleteBackward:"},
+)
+
 
 def parse_avro_keydata(avro_path: Path) -> dict[str, dict[str, str]]:
     raw = avro_path.read_text(encoding="utf-8")
@@ -157,6 +165,9 @@ def build_keylayout_xml(
         for avro_key, keycode in sorted_keys:
             output = mapping.get(avro_key, {}).get(state, "")
             ET.SubElement(key_map, "key", {"code": str(keycode), "output": output})
+        for special_key in SPECIAL_KEYS:
+            attrs = {k: str(v) for k, v in special_key.items()}
+            ET.SubElement(key_map, "key", attrs)
 
     indent_xml(keyboard)
     xml_body = ET.tostring(keyboard, encoding="unicode")

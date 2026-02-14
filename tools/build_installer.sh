@@ -5,9 +5,13 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
 LAYOUT_NAME="UniJoyMac"
 BUNDLE_NAME="${LAYOUT_NAME}.bundle"
+KEYLAYOUT_FILE="${LAYOUT_NAME}.keylayout"
+ICON_FILE="${LAYOUT_NAME}.icns"
 INPUT_BUNDLE="$DIST_DIR/$BUNDLE_NAME"
+INPUT_KEYLAYOUT="$DIST_DIR/$KEYLAYOUT_FILE"
+INPUT_ICON="$DIST_DIR/$ICON_FILE"
 PKG_ID="pro.lonesock.keyboard.unijoymac.installer"
-PKG_VERSION="1.0.0"
+PKG_VERSION="1.0.1"
 OUTPUT_PKG="$DIST_DIR/${LAYOUT_NAME}-Installer.pkg"
 SIGNED_PKG="$DIST_DIR/${LAYOUT_NAME}-Installer-signed.pkg"
 SIGN_IDENTITY="${UNIJOYMAC_SIGN_IDENTITY:-}"
@@ -24,6 +28,16 @@ trap cleanup EXIT
 if [[ ! -d "$INPUT_BUNDLE" ]]; then
   echo "ERROR: Missing bundle: $INPUT_BUNDLE"
   echo "Build or copy the bundle into dist/ first."
+  exit 1
+fi
+
+if [[ ! -f "$INPUT_KEYLAYOUT" ]]; then
+  echo "ERROR: Missing keylayout file: $INPUT_KEYLAYOUT"
+  exit 1
+fi
+
+if [[ ! -f "$INPUT_ICON" ]]; then
+  echo "ERROR: Missing icon file: $INPUT_ICON"
   exit 1
 fi
 
@@ -44,6 +58,8 @@ fi
 
 mkdir -p "$PKG_ROOT/Library/Keyboard Layouts"
 COPYFILE_DISABLE=1 /usr/bin/ditto --norsrc "$INPUT_BUNDLE" "$PKG_ROOT/Library/Keyboard Layouts/$BUNDLE_NAME"
+cp "$INPUT_KEYLAYOUT" "$PKG_ROOT/Library/Keyboard Layouts/$KEYLAYOUT_FILE"
+cp "$INPUT_ICON" "$PKG_ROOT/Library/Keyboard Layouts/$ICON_FILE"
 /usr/bin/xattr -cr "$PKG_ROOT" >/dev/null 2>&1 || true
 /usr/bin/dot_clean -m "$PKG_ROOT" >/dev/null 2>&1 || true
 

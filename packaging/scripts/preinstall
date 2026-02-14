@@ -2,9 +2,19 @@
 set -euo pipefail
 
 TARGET="/Library/Keyboard Layouts/UniJoyMac.bundle"
+TARGET_KEYLAYOUT="/Library/Keyboard Layouts/UniJoyMac.keylayout"
+TARGET_ICON="/Library/Keyboard Layouts/UniJoyMac.icns"
 
 if [[ -d "$TARGET" ]]; then
   rm -rf "$TARGET"
+fi
+
+if [[ -f "$TARGET_KEYLAYOUT" ]]; then
+  rm -f "$TARGET_KEYLAYOUT"
+fi
+
+if [[ -f "$TARGET_ICON" ]]; then
+  rm -f "$TARGET_ICON"
 fi
 
 exit 0

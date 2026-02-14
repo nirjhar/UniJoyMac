@@ -7,7 +7,7 @@
   <key>CFBundleDisplayName</key>
   <string>UniJoyMac</string>
   <key>CFBundleIdentifier</key>
-  <string>pro.lonesock.keyboard.unijoymac</string>
+  <string>pro.lonesock.keyboardlayout.unijoymac</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -25,7 +25,13 @@
     <key>KLName</key>
     <string>UniJoyMac</string>
     <key>TISInputSourceID</key>
-    <string>pro.lonesock.keyboard.unijoymac</string>
+    <string>pro.lonesock.keyboardlayout.unijoymac</string>
+    <key>TISInputSourceLanguages</key>
+    <array>
+      <string>bn</string>
+    </array>
+    <key>TISInputSourceType</key>
+    <string>TISTypeKeyboardLayout</string>
     <key>TISIntendedLanguage</key>
     <string>bn</string>
     <key>TISLocalizedName</key>
