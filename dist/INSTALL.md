@@ -24,28 +24,12 @@ To build a signed package before sharing:
 UNIJOYMAC_SIGN_IDENTITY="Developer ID Installer: YOUR NAME (TEAMID)" bash "tools/build_installer.sh"
 ```
 
-## User install (current user)
-
-```bash
-mkdir -p "$HOME/Library/Keyboard Layouts"
-cp -R "dist/UniJoyMac.bundle" "$HOME/Library/Keyboard Layouts/"
-touch "$HOME/Library/Keyboard Layouts"
-```
-
 Then:
 
 1. Open **System Settings -> Keyboard -> Input Sources**
 2. Click **+**
 3. Look under **Others**
 4. Add **UniJoyMac**
-
-## System-wide install (all users)
-
-```bash
-sudo mkdir -p "/Library/Keyboard Layouts"
-sudo cp -R "dist/UniJoyMac.bundle" "/Library/Keyboard Layouts/"
-sudo touch "/Library/Keyboard Layouts"
-```
 
 ## Verify installation
 
@@ -63,14 +47,7 @@ bash "dist/verify.sh" --system
 
 If you chose **Later** in the installer prompt, log out and back in before adding the layout.
 
-If it still does not appear, run this full reset and reinstall flow:
-
-```bash
-rm -rf "$HOME/Library/Keyboard Layouts/UniJoyMac.bundle"
-sudo rm -rf "/Library/Keyboard Layouts/UniJoyMac.bundle"
-bash "tools/build_installer.sh"
-open "dist/UniJoyMac-Installer.pkg"
-```
+If it still does not appear, run the installer again and choose **Log Out Now** when prompted.
 
 ## Manual test checklist (TextEdit)
 

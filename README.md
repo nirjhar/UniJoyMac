@@ -18,13 +18,13 @@ It provides a positional Bangla layout for macOS Input Sources and includes:
 - `dist/UniJoyMac.icns` - icon file used by the bundle
 - `dist/UniJoyMac.bundle` - distributable keyboard layout bundle
 - `dist/UniJoyMac-Installer.pkg` - macOS installer package (built locally)
-- `dist/INSTALL.md` - step-by-step install and manual test checklist
+- `dist/INSTALL.md` - step-by-step installer usage and test checklist
 - `dist/verify.sh` - install and mapping verification script
 - `dist/mapping_report.md` - mapping coverage and assumptions
 
 ## macOS support
 
-Tested in a modern macOS environment where custom keyboard layouts in `~/Library/Keyboard Layouts` appear under **System Settings -> Keyboard -> Input Sources -> Others**.
+Tested in a modern macOS environment where installed keyboard layouts appear under **System Settings -> Keyboard -> Input Sources -> Others**.
 
 ## Install
 
@@ -48,7 +48,7 @@ Then run:
 open "dist/UniJoyMac-Installer.pkg"
 ```
 
-The installer places `UniJoyMac.bundle` in `/Library/Keyboard Layouts`, touches the keyboard layouts directory, and refreshes input-source daemons.
+The installer places `UniJoyMac.bundle` in `/Library/Keyboard Layouts`, refreshes keyboard-layout discovery, and prompts for logout/login.
 When signing is enabled, the script signs `dist/UniJoyMac-Installer.pkg` in-place and prints signature details.
 
 Find available installer identities:
@@ -57,25 +57,9 @@ Find available installer identities:
 security find-identity -v -p basic
 ```
 
-### User install (manual)
-
-```bash
-mkdir -p "$HOME/Library/Keyboard Layouts"
-cp -R "dist/UniJoyMac.bundle" "$HOME/Library/Keyboard Layouts/"
-touch "$HOME/Library/Keyboard Layouts"
-```
-
 Then add the input source from:
 
 `System Settings -> Keyboard -> Input Sources -> + -> Others -> UniJoyMac`
-
-### System-wide install (manual)
-
-```bash
-sudo mkdir -p "/Library/Keyboard Layouts"
-sudo cp -R "dist/UniJoyMac.bundle" "/Library/Keyboard Layouts/"
-sudo touch "/Library/Keyboard Layouts"
-```
 
 ## Verify
 
