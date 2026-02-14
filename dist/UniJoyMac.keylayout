@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">
-<keyboard group="126" id="8801" name="UniJoyMac" maxout="4">
+<keyboard group="126" id="-28676" name="UniJoyMac" maxout="4">
   <layouts>
-    <layout first="0" last="0" mapSet="0" modifiers="0" />
+    <layout first="0" last="0" mapSet="mapset_0" modifiers="modifiers_0" />
   </layouts>
-  <modifierMap id="0" defaultIndex="0">
+  <modifierMap id="modifiers_0" defaultIndex="0">
     <keyMapSelect mapIndex="0">
       <modifier keys="" />
     </keyMapSelect>
@@ -17,18 +17,30 @@
     <keyMapSelect mapIndex="3">
       <modifier keys="anyShift anyOption" />
     </keyMapSelect>
+    <keyMapSelect mapIndex="4">
+      <modifier keys="anyCommand" />
+    </keyMapSelect>
+    <keyMapSelect mapIndex="5">
+      <modifier keys="anyShift anyCommand" />
+    </keyMapSelect>
+    <keyMapSelect mapIndex="6">
+      <modifier keys="anyOption anyCommand" />
+    </keyMapSelect>
+    <keyMapSelect mapIndex="7">
+      <modifier keys="anyShift anyOption anyCommand" />
+    </keyMapSelect>
   </modifierMap>
-  <keyMapSet id="0">
+  <keyMapSet id="mapset_0">
     <keyMap index="0">
-      <key code="0" output="ৃ" />
-      <key code="1" output="ু" />
-      <key code="2" output="ি" />
-      <key code="3" output="া" />
+      <key code="0" action="act_sign_ri" />
+      <key code="1" action="act_sign_u" />
+      <key code="2" action="act_sign_i" />
+      <key code="3" action="act_sign_aa" />
       <key code="4" output="ব" />
-      <key code="5" output="্" />
+      <key code="5" action="act_virama" />
       <key code="6" output="্র" />
-      <key code="7" output="ো" />
-      <key code="8" output="ে" />
+      <key code="7" action="act_sign_o" />
+      <key code="8" action="act_sign_e" />
       <key code="9" output="র" />
       <key code="11" output="ন" />
       <key code="12" output="ং" />
@@ -54,7 +66,7 @@
       <key code="32" output="জ" />
       <key code="33" output="[" />
       <key code="34" output="হ" />
-      <key code="35" output="ড়" />
+      <key code="35" output="ড়" />
       <key code="37" output="দ" />
       <key code="38" output="ক" />
       <key code="39" output="'" />
@@ -67,25 +79,24 @@
       <key code="46" output="ম" />
       <key code="47" output="." />
       <key code="50" output="‌" />
-      <key code="36" action="insertNewline:" />
-      <key code="48" action="insertTab:" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
       <key code="49" output=" " />
-      <key code="51" action="deleteBackward:" />
     </keyMap>
     <keyMap index="1">
       <key code="0" output="র্" />
-      <key code="1" output="ূ" />
-      <key code="2" output="ী" />
+      <key code="1" action="act_sign_uu" />
+      <key code="2" action="act_sign_ii" />
       <key code="3" output="অ" />
       <key code="4" output="ভ" />
       <key code="5" output="।" />
       <key code="6" output="্য" />
-      <key code="7" output="ৌ" />
-      <key code="8" output="ৈ" />
+      <key code="7" action="act_sign_ou" />
+      <key code="8" action="act_sign_oi" />
       <key code="9" output="ল" />
       <key code="11" output="ণ" />
       <key code="12" output="ঙ" />
-      <key code="13" output="য়" />
+      <key code="13" output="য়" />
       <key code="14" output="ঢ" />
       <key code="15" output="ফ" />
       <key code="16" output="ছ" />
@@ -107,7 +118,7 @@
       <key code="32" output="ঝ" />
       <key code="33" output="{" />
       <key code="34" output="ঞ" />
-      <key code="35" output="ঢ়" />
+      <key code="35" output="ঢ়" />
       <key code="37" output="ধ" />
       <key code="38" output="খ" />
       <key code="39" output="&quot;" />
@@ -120,10 +131,9 @@
       <key code="46" output="শ" />
       <key code="47" output="&gt;" />
       <key code="50" output="‍" />
-      <key code="36" action="insertNewline:" />
-      <key code="48" action="insertTab:" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
       <key code="49" output=" " />
-      <key code="51" action="deleteBackward:" />
     </keyMap>
     <keyMap index="2">
       <key code="0" output="ঋ" />
@@ -173,10 +183,9 @@
       <key code="46" output="" />
       <key code="47" output="" />
       <key code="50" output="" />
-      <key code="36" action="insertNewline:" />
-      <key code="48" action="insertTab:" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
       <key code="49" output=" " />
-      <key code="51" action="deleteBackward:" />
     </keyMap>
     <keyMap index="3">
       <key code="0" output="" />
@@ -226,10 +235,266 @@
       <key code="46" output="" />
       <key code="47" output="" />
       <key code="50" output="" />
-      <key code="36" action="insertNewline:" />
-      <key code="48" action="insertTab:" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
       <key code="49" output=" " />
-      <key code="51" action="deleteBackward:" />
+    </keyMap>
+    <keyMap index="4">
+      <key code="0" output="a" />
+      <key code="1" output="s" />
+      <key code="2" output="d" />
+      <key code="3" output="f" />
+      <key code="4" output="h" />
+      <key code="5" output="g" />
+      <key code="6" output="z" />
+      <key code="7" output="x" />
+      <key code="8" output="c" />
+      <key code="9" output="v" />
+      <key code="11" output="b" />
+      <key code="12" output="q" />
+      <key code="13" output="w" />
+      <key code="14" output="e" />
+      <key code="15" output="r" />
+      <key code="16" output="y" />
+      <key code="17" output="t" />
+      <key code="18" output="1" />
+      <key code="19" output="2" />
+      <key code="20" output="3" />
+      <key code="21" output="4" />
+      <key code="22" output="6" />
+      <key code="23" output="5" />
+      <key code="24" output="=" />
+      <key code="25" output="9" />
+      <key code="26" output="7" />
+      <key code="27" output="-" />
+      <key code="28" output="8" />
+      <key code="29" output="0" />
+      <key code="30" output="]" />
+      <key code="31" output="o" />
+      <key code="32" output="u" />
+      <key code="33" output="[" />
+      <key code="34" output="i" />
+      <key code="35" output="p" />
+      <key code="37" output="l" />
+      <key code="38" output="j" />
+      <key code="39" output="'" />
+      <key code="40" output="k" />
+      <key code="41" output=";" />
+      <key code="42" output="\" />
+      <key code="43" output="," />
+      <key code="44" output="/" />
+      <key code="45" output="n" />
+      <key code="46" output="m" />
+      <key code="47" output="." />
+      <key code="50" output="`" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
+      <key code="49" output=" " />
+    </keyMap>
+    <keyMap index="5">
+      <key code="0" output="A" />
+      <key code="1" output="S" />
+      <key code="2" output="D" />
+      <key code="3" output="F" />
+      <key code="4" output="H" />
+      <key code="5" output="G" />
+      <key code="6" output="Z" />
+      <key code="7" output="X" />
+      <key code="8" output="C" />
+      <key code="9" output="V" />
+      <key code="11" output="B" />
+      <key code="12" output="Q" />
+      <key code="13" output="W" />
+      <key code="14" output="E" />
+      <key code="15" output="R" />
+      <key code="16" output="Y" />
+      <key code="17" output="T" />
+      <key code="18" output="!" />
+      <key code="19" output="@" />
+      <key code="20" output="#" />
+      <key code="21" output="$" />
+      <key code="22" output="^" />
+      <key code="23" output="%" />
+      <key code="24" output="+" />
+      <key code="25" output="(" />
+      <key code="26" output="&amp;" />
+      <key code="27" output="_" />
+      <key code="28" output="*" />
+      <key code="29" output=")" />
+      <key code="30" output="}" />
+      <key code="31" output="O" />
+      <key code="32" output="U" />
+      <key code="33" output="{" />
+      <key code="34" output="I" />
+      <key code="35" output="P" />
+      <key code="37" output="L" />
+      <key code="38" output="J" />
+      <key code="39" output="&quot;" />
+      <key code="40" output="K" />
+      <key code="41" output=":" />
+      <key code="42" output="|" />
+      <key code="43" output="&lt;" />
+      <key code="44" output="?" />
+      <key code="45" output="N" />
+      <key code="46" output="M" />
+      <key code="47" output="&gt;" />
+      <key code="50" output="~" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
+      <key code="49" output=" " />
+    </keyMap>
+    <keyMap index="6">
+      <key code="0" output="a" />
+      <key code="1" output="s" />
+      <key code="2" output="d" />
+      <key code="3" output="f" />
+      <key code="4" output="h" />
+      <key code="5" output="g" />
+      <key code="6" output="z" />
+      <key code="7" output="x" />
+      <key code="8" output="c" />
+      <key code="9" output="v" />
+      <key code="11" output="b" />
+      <key code="12" output="q" />
+      <key code="13" output="w" />
+      <key code="14" output="e" />
+      <key code="15" output="r" />
+      <key code="16" output="y" />
+      <key code="17" output="t" />
+      <key code="18" output="1" />
+      <key code="19" output="2" />
+      <key code="20" output="3" />
+      <key code="21" output="4" />
+      <key code="22" output="6" />
+      <key code="23" output="5" />
+      <key code="24" output="=" />
+      <key code="25" output="9" />
+      <key code="26" output="7" />
+      <key code="27" output="-" />
+      <key code="28" output="8" />
+      <key code="29" output="0" />
+      <key code="30" output="]" />
+      <key code="31" output="o" />
+      <key code="32" output="u" />
+      <key code="33" output="[" />
+      <key code="34" output="i" />
+      <key code="35" output="p" />
+      <key code="37" output="l" />
+      <key code="38" output="j" />
+      <key code="39" output="'" />
+      <key code="40" output="k" />
+      <key code="41" output=";" />
+      <key code="42" output="\" />
+      <key code="43" output="," />
+      <key code="44" output="/" />
+      <key code="45" output="n" />
+      <key code="46" output="m" />
+      <key code="47" output="." />
+      <key code="50" output="`" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
+      <key code="49" output=" " />
+    </keyMap>
+    <keyMap index="7">
+      <key code="0" output="A" />
+      <key code="1" output="S" />
+      <key code="2" output="D" />
+      <key code="3" output="F" />
+      <key code="4" output="H" />
+      <key code="5" output="G" />
+      <key code="6" output="Z" />
+      <key code="7" output="X" />
+      <key code="8" output="C" />
+      <key code="9" output="V" />
+      <key code="11" output="B" />
+      <key code="12" output="Q" />
+      <key code="13" output="W" />
+      <key code="14" output="E" />
+      <key code="15" output="R" />
+      <key code="16" output="Y" />
+      <key code="17" output="T" />
+      <key code="18" output="!" />
+      <key code="19" output="@" />
+      <key code="20" output="#" />
+      <key code="21" output="$" />
+      <key code="22" output="^" />
+      <key code="23" output="%" />
+      <key code="24" output="+" />
+      <key code="25" output="(" />
+      <key code="26" output="&amp;" />
+      <key code="27" output="_" />
+      <key code="28" output="*" />
+      <key code="29" output=")" />
+      <key code="30" output="}" />
+      <key code="31" output="O" />
+      <key code="32" output="U" />
+      <key code="33" output="{" />
+      <key code="34" output="I" />
+      <key code="35" output="P" />
+      <key code="37" output="L" />
+      <key code="38" output="J" />
+      <key code="39" output="&quot;" />
+      <key code="40" output="K" />
+      <key code="41" output=":" />
+      <key code="42" output="|" />
+      <key code="43" output="&lt;" />
+      <key code="44" output="?" />
+      <key code="45" output="N" />
+      <key code="46" output="M" />
+      <key code="47" output="&gt;" />
+      <key code="50" output="~" />
+      <key code="36" output="&#13;" />
+      <key code="48" output="&#09;" />
+      <key code="49" output=" " />
     </keyMap>
   </keyMapSet>
+  <actions>
+    <action id="act_sign_aa">
+      <when state="none" output="া" />
+      <when state="state_virama" output="আ" />
+    </action>
+    <action id="act_sign_i">
+      <when state="none" output="ি" />
+      <when state="state_virama" output="ই" />
+    </action>
+    <action id="act_sign_ii">
+      <when state="none" output="ী" />
+      <when state="state_virama" output="ঈ" />
+    </action>
+    <action id="act_sign_u">
+      <when state="none" output="ু" />
+      <when state="state_virama" output="উ" />
+    </action>
+    <action id="act_sign_uu">
+      <when state="none" output="ূ" />
+      <when state="state_virama" output="ঊ" />
+    </action>
+    <action id="act_sign_ri">
+      <when state="none" output="ৃ" />
+      <when state="state_virama" output="ঋ" />
+    </action>
+    <action id="act_sign_e">
+      <when state="none" output="ে" />
+      <when state="state_virama" output="এ" />
+    </action>
+    <action id="act_sign_o">
+      <when state="none" output="ো" />
+      <when state="state_virama" output="ও" />
+    </action>
+    <action id="act_sign_ou">
+      <when state="none" output="ৌ" />
+      <when state="state_virama" output="ঔ" />
+    </action>
+    <action id="act_sign_oi">
+      <when state="none" output="ৈ" />
+      <when state="state_virama" output="ঐ" />
+    </action>
+    <action id="act_virama">
+      <when state="none" next="state_virama" />
+      <when state="state_virama" output="্" />
+    </action>
+  </actions>
+  <terminators>
+    <when state="state_virama" output="্" />
+  </terminators>
 </keyboard>

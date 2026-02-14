@@ -53,7 +53,8 @@ fi
 
 if command -v xmllint >/dev/null 2>&1; then
   xmllint --noout "$KEYLAYOUT_PATH"
-  echo "- keylayout XML is valid"
+  xmllint --noout --valid "$KEYLAYOUT_PATH"
+  echo "- keylayout XML and DTD validation passed"
 else
   echo "WARN: xmllint not available, skipping XML validation"
 fi
@@ -65,17 +66,41 @@ keylayout_path = """$KEYLAYOUT_PATH"""
 root = ET.parse(keylayout_path).getroot()
 
 maps = {}
+actions = {}
+
+for action in root.findall(".//actions/action"):
+    action_id = action.attrib.get("id")
+    if not action_id:
+        continue
+    by_state = {}
+    for when in action.findall("when"):
+        state = when.attrib.get("state", "none")
+        output = when.attrib.get("output")
+        if output is not None:
+            by_state[state] = output
+    actions[action_id] = by_state
+
 for key_map in root.findall(".//keyMap"):
     idx = int(key_map.attrib["index"])
-    maps[idx] = {int(k.attrib["code"]): k.attrib.get("output", "") for k in key_map.findall("key")}
+    resolved = {}
+    for key in key_map.findall("key"):
+        code = int(key.attrib["code"])
+        output = key.attrib.get("output")
+        if output is None:
+            action_id = key.attrib.get("action", "")
+            output = actions.get(action_id, {}).get("none", "")
+        resolved[code] = output
+    maps[idx] = resolved
 
 checks = [
     ("normal", 0, 12, "ং"),
     ("normal", 0, 3, "া"),
+    ("normal", 0, 35, "ড়"),
     ("normal", 0, 50, "\u200c"),
     ("shift", 1, 12, "ঙ"),
     ("shift", 1, 19, "ঁ"),
     ("shift", 1, 5, "।"),
+    ("shift", 1, 35, "ঢ়"),
     ("option", 2, 0, "ঋ"),
     ("option", 2, 7, "ও"),
     ("option+shift", 3, 1, "ঊ"),

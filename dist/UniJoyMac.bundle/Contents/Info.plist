@@ -20,6 +20,10 @@
   <string>1</string>
   <key>KLInfo_0</key>
   <dict>
+    <key>KLKeyboardLayoutFile</key>
+    <string>UniJoyMac.keylayout</string>
+    <key>KLKeyboardLayoutName</key>
+    <string>UniJoyMac</string>
     <key>KLIconFile</key>
     <string>UniJoyMac.icns</string>
     <key>KLName</key>

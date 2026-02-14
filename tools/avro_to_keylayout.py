@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import unicodedata
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -70,12 +69,146 @@ STATE_BY_AVRO_SUFFIX = {
 
 MODIFIER_ORDER = ["normal", "shift", "option", "option_shift"]
 
-# Non-character keys that must keep working in custom layouts.
+COMMAND_OUTPUT_BY_KEY = {
+    "OEM3": "`",
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5",
+    "6": "6",
+    "7": "7",
+    "8": "8",
+    "9": "9",
+    "0": "0",
+    "MINUS": "-",
+    "PLUS": "=",
+    "Q": "q",
+    "W": "w",
+    "E": "e",
+    "R": "r",
+    "T": "t",
+    "Y": "y",
+    "U": "u",
+    "I": "i",
+    "O": "o",
+    "P": "p",
+    "OEM4": "[",
+    "OEM6": "]",
+    "OEM5": "\\",
+    "A": "a",
+    "S": "s",
+    "D": "d",
+    "F": "f",
+    "G": "g",
+    "H": "h",
+    "J": "j",
+    "K": "k",
+    "L": "l",
+    "OEM1": ";",
+    "OEM7": "'",
+    "Z": "z",
+    "X": "x",
+    "C": "c",
+    "V": "v",
+    "B": "b",
+    "N": "n",
+    "M": "m",
+    "COMMA": ",",
+    "PERIOD": ".",
+    "OEM2": "/",
+}
+
+SHIFTED_COMMAND_OUTPUT_BY_KEY = {
+    "OEM3": "~",
+    "1": "!",
+    "2": "@",
+    "3": "#",
+    "4": "$",
+    "5": "%",
+    "6": "^",
+    "7": "&",
+    "8": "*",
+    "9": "(",
+    "0": ")",
+    "MINUS": "_",
+    "PLUS": "+",
+    "Q": "Q",
+    "W": "W",
+    "E": "E",
+    "R": "R",
+    "T": "T",
+    "Y": "Y",
+    "U": "U",
+    "I": "I",
+    "O": "O",
+    "P": "P",
+    "OEM4": "{",
+    "OEM6": "}",
+    "OEM5": "|",
+    "A": "A",
+    "S": "S",
+    "D": "D",
+    "F": "F",
+    "G": "G",
+    "H": "H",
+    "J": "J",
+    "K": "K",
+    "L": "L",
+    "OEM1": ":",
+    "OEM7": '"',
+    "Z": "Z",
+    "X": "X",
+    "C": "C",
+    "V": "V",
+    "B": "B",
+    "N": "N",
+    "M": "M",
+    "COMMA": "<",
+    "PERIOD": ">",
+    "OEM2": "?",
+}
+
+# UniJoy-style state machine for Bengali virama and dependent vowels.
+# This improves conjunct behavior and allows typing independent vowels by
+# pressing virama then the corresponding vowel sign.
+VIRAMA = "্"
+VIRAMA_STATE = "state_virama"
+VIRAMA_ACTION_ID = "act_virama"
+ACTION_ID_BY_OUTPUT = {
+    "া": "act_sign_aa",
+    "ি": "act_sign_i",
+    "ী": "act_sign_ii",
+    "ু": "act_sign_u",
+    "ূ": "act_sign_uu",
+    "ৃ": "act_sign_ri",
+    "ে": "act_sign_e",
+    "ো": "act_sign_o",
+    "ৌ": "act_sign_ou",
+    "ৈ": "act_sign_oi",
+    VIRAMA: VIRAMA_ACTION_ID,
+}
+ACTION_OUTPUT_BY_ID = {
+    "act_sign_aa": {"none": "া", VIRAMA_STATE: "আ"},
+    "act_sign_i": {"none": "ি", VIRAMA_STATE: "ই"},
+    "act_sign_ii": {"none": "ী", VIRAMA_STATE: "ঈ"},
+    "act_sign_u": {"none": "ু", VIRAMA_STATE: "উ"},
+    "act_sign_uu": {"none": "ূ", VIRAMA_STATE: "ঊ"},
+    "act_sign_ri": {"none": "ৃ", VIRAMA_STATE: "ঋ"},
+    "act_sign_e": {"none": "ে", VIRAMA_STATE: "এ"},
+    "act_sign_o": {"none": "ো", VIRAMA_STATE: "ও"},
+    "act_sign_ou": {"none": "ৌ", VIRAMA_STATE: "ঔ"},
+    "act_sign_oi": {"none": "ৈ", VIRAMA_STATE: "ঐ"},
+}
+ACTION_OUTPUTS = set(ACTION_ID_BY_OUTPUT)
+
+# Non-character keys that should emit control characters in custom layouts.
+# Key code 51 (delete/backspace) is intentionally omitted: macOS handles it
+# natively, and U+007F is not a legal XML 1.0 character.
 SPECIAL_KEYS = (
-    {"code": 36, "action": "insertNewline:"},
-    {"code": 48, "action": "insertTab:"},
+    {"code": 36, "output": "\r"},
+    {"code": 48, "output": "\t"},
     {"code": 49, "output": " "},
-    {"code": 51, "action": "deleteBackward:"},
 )
 
 
@@ -108,7 +241,9 @@ def parse_avro_keydata(avro_path: Path) -> dict[str, dict[str, str]]:
         cdata_match = cdata_pattern.match(value)
         if cdata_match:
             value = cdata_match.group(1)
-        mapping[avro_key][state] = unicodedata.normalize("NFC", value)
+        # Preserve Avro source code points exactly. Bengali letters like ড়/ঢ়/য়
+        # are compatibility decomposition exclusions and should not be rewritten.
+        mapping[avro_key][state] = value
 
     return mapping
 
@@ -145,9 +280,9 @@ def build_keylayout_xml(
     )
 
     layouts = ET.SubElement(keyboard, "layouts")
-    ET.SubElement(layouts, "layout", {"first": "0", "last": "0", "mapSet": "0", "modifiers": "0"})
+    ET.SubElement(layouts, "layout", {"first": "0", "last": "0", "mapSet": "mapset_0", "modifiers": "modifiers_0"})
 
-    modifier_map = ET.SubElement(keyboard, "modifierMap", {"id": "0", "defaultIndex": "0"})
+    modifier_map = ET.SubElement(keyboard, "modifierMap", {"id": "modifiers_0", "defaultIndex": "0"})
     ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "0"})
     ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "1"})
     ET.SubElement(modifier_map[0], "modifier", {"keys": ""})
@@ -156,18 +291,52 @@ def build_keylayout_xml(
     ET.SubElement(keymap_select_2, "modifier", {"keys": "anyOption"})
     keymap_select_3 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "3"})
     ET.SubElement(keymap_select_3, "modifier", {"keys": "anyShift anyOption"})
+    keymap_select_4 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "4"})
+    ET.SubElement(keymap_select_4, "modifier", {"keys": "anyCommand"})
+    keymap_select_5 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "5"})
+    ET.SubElement(keymap_select_5, "modifier", {"keys": "anyShift anyCommand"})
+    keymap_select_6 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "6"})
+    ET.SubElement(keymap_select_6, "modifier", {"keys": "anyOption anyCommand"})
+    keymap_select_7 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "7"})
+    ET.SubElement(keymap_select_7, "modifier", {"keys": "anyShift anyOption anyCommand"})
 
-    key_map_set = ET.SubElement(keyboard, "keyMapSet", {"id": "0"})
+    key_map_set = ET.SubElement(keyboard, "keyMapSet", {"id": "mapset_0"})
     sorted_keys = sorted(KEYCODE_BY_AVRO_KEY.items(), key=lambda item: item[1])
 
     for index, state in enumerate(MODIFIER_ORDER):
         key_map = ET.SubElement(key_map_set, "keyMap", {"index": str(index)})
         for avro_key, keycode in sorted_keys:
             output = mapping.get(avro_key, {}).get(state, "")
-            ET.SubElement(key_map, "key", {"code": str(keycode), "output": output})
+            attrs = {"code": str(keycode)}
+            if output in ACTION_OUTPUTS:
+                attrs["action"] = ACTION_ID_BY_OUTPUT[output]
+            else:
+                attrs["output"] = output
+            ET.SubElement(key_map, "key", attrs)
         for special_key in SPECIAL_KEYS:
             attrs = {k: str(v) for k, v in special_key.items()}
             ET.SubElement(key_map, "key", attrs)
+
+    for index, command_map in ((4, COMMAND_OUTPUT_BY_KEY), (5, SHIFTED_COMMAND_OUTPUT_BY_KEY), (6, COMMAND_OUTPUT_BY_KEY), (7, SHIFTED_COMMAND_OUTPUT_BY_KEY)):
+        key_map = ET.SubElement(key_map_set, "keyMap", {"index": str(index)})
+        for avro_key, keycode in sorted_keys:
+            ET.SubElement(key_map, "key", {"code": str(keycode), "output": command_map[avro_key]})
+        for special_key in SPECIAL_KEYS:
+            attrs = {k: str(v) for k, v in special_key.items()}
+            ET.SubElement(key_map, "key", attrs)
+
+    actions = ET.SubElement(keyboard, "actions")
+    for action_id, when_by_state in ACTION_OUTPUT_BY_ID.items():
+        action = ET.SubElement(actions, "action", {"id": action_id})
+        for state_name, out in when_by_state.items():
+            ET.SubElement(action, "when", {"state": state_name, "output": out})
+
+    virama_action = ET.SubElement(actions, "action", {"id": VIRAMA_ACTION_ID})
+    ET.SubElement(virama_action, "when", {"state": "none", "next": VIRAMA_STATE})
+    ET.SubElement(virama_action, "when", {"state": VIRAMA_STATE, "output": VIRAMA})
+
+    terminators = ET.SubElement(keyboard, "terminators")
+    ET.SubElement(terminators, "when", {"state": VIRAMA_STATE, "output": VIRAMA})
 
     indent_xml(keyboard)
     xml_body = ET.tostring(keyboard, encoding="unicode")
@@ -183,7 +352,7 @@ def main() -> None:
     parser.add_argument("input", type=Path, help="Path to ub.avrolayout")
     parser.add_argument("output", type=Path, help="Path to output .keylayout")
     parser.add_argument("--layout-name", default="UniJoyMac", help="Layout name in keylayout")
-    parser.add_argument("--keyboard-id", type=int, default=8801, help="Integer keyboard id")
+    parser.add_argument("--keyboard-id", type=int, default=-28676, help="Integer keyboard id")
     parser.add_argument("--group", type=int, default=126, help="Keyboard group id")
     args = parser.parse_args()
 

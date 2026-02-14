@@ -24,7 +24,8 @@
   - `Shift` -> Shift
   - `AltGr` -> Option
   - `ShiftAltGr` -> Option+Shift
-- Applied NFC normalization on all emitted Unicode output strings.
+- Preserved Avro Unicode code points exactly (no normalization rewrite), so letters like `ড়`, `ঢ়`, `য়` stay in their source form.
+- Added a virama state-machine (`্`) in the generated `.keylayout` actions/terminators to improve UniJoy-style conjunct and vowel behavior.
 
 Coverage summary from source `KeyData`:
 

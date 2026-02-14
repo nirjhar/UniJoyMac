@@ -32,9 +32,16 @@ refresh_layout_discovery() {
 }
 
 /usr/bin/touch "$TARGET_DIR"
+
+# Keep a single install source to avoid duplicate entries in Input Sources.
+if [[ -f "$SYSTEM_KEYLAYOUT" ]]; then
+  rm -f "$SYSTEM_KEYLAYOUT"
+fi
+if [[ -f "$SYSTEM_ICON" ]]; then
+  rm -f "$SYSTEM_ICON"
+fi
+
 clear_layout_xattrs "$SYSTEM_BUNDLE"
-clear_layout_xattrs "$SYSTEM_KEYLAYOUT"
-clear_layout_xattrs "$SYSTEM_ICON"
 
 CONSOLE_USER="$(/usr/bin/stat -f%Su /dev/console 2>/dev/null || true)"
 if [[ -n "$CONSOLE_USER" && "$CONSOLE_USER" != "root" ]]; then
@@ -55,18 +62,9 @@ if [[ -n "$CONSOLE_USER" && "$CONSOLE_USER" != "root" ]]; then
       rm -f "$USER_ICON"
     fi
     /bin/mkdir -p "$USER_LAYOUT_DIR"
-    if [[ -f "$SYSTEM_KEYLAYOUT" ]]; then
-      cp "$SYSTEM_KEYLAYOUT" "$USER_KEYLAYOUT"
-    fi
-    if [[ -f "$SYSTEM_ICON" ]]; then
-      cp "$SYSTEM_ICON" "$USER_ICON"
-    fi
-    if [[ -d "$SYSTEM_BUNDLE" ]]; then
-      COPYFILE_DISABLE=1 /usr/bin/ditto --norsrc "$SYSTEM_BUNDLE" "$USER_BUNDLE"
-    fi
-    clear_layout_xattrs "$USER_BUNDLE"
-    clear_layout_xattrs "$USER_KEYLAYOUT"
-    clear_layout_xattrs "$USER_ICON"
+
+    # Remove user-level copies so only /Library/Keyboard Layouts is active.
+    clear_layout_xattrs "$USER_LAYOUT_DIR"
     /usr/sbin/chown -R "$CONSOLE_USER":staff "$USER_LAYOUT_DIR" >/dev/null 2>&1 || true
     /usr/bin/touch "$USER_LAYOUT_DIR"
   fi

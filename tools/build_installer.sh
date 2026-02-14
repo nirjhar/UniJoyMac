@@ -11,7 +11,7 @@ INPUT_BUNDLE="$DIST_DIR/$BUNDLE_NAME"
 INPUT_KEYLAYOUT="$DIST_DIR/$KEYLAYOUT_FILE"
 INPUT_ICON="$DIST_DIR/$ICON_FILE"
 PKG_ID="pro.lonesock.keyboard.unijoymac.installer"
-PKG_VERSION="1.0.1"
+PKG_VERSION="1.0.2"
 OUTPUT_PKG="$DIST_DIR/${LAYOUT_NAME}-Installer.pkg"
 SIGNED_PKG="$DIST_DIR/${LAYOUT_NAME}-Installer-signed.pkg"
 SIGN_IDENTITY="${UNIJOYMAC_SIGN_IDENTITY:-}"
@@ -58,8 +58,6 @@ fi
 
 mkdir -p "$PKG_ROOT/Library/Keyboard Layouts"
 COPYFILE_DISABLE=1 /usr/bin/ditto --norsrc "$INPUT_BUNDLE" "$PKG_ROOT/Library/Keyboard Layouts/$BUNDLE_NAME"
-cp "$INPUT_KEYLAYOUT" "$PKG_ROOT/Library/Keyboard Layouts/$KEYLAYOUT_FILE"
-cp "$INPUT_ICON" "$PKG_ROOT/Library/Keyboard Layouts/$ICON_FILE"
 /usr/bin/xattr -cr "$PKG_ROOT" >/dev/null 2>&1 || true
 /usr/bin/dot_clean -m "$PKG_ROOT" >/dev/null 2>&1 || true
 
@@ -71,7 +69,7 @@ pkgbuild \
   "$OUTPUT_PKG"
 
 echo "Built installer: $OUTPUT_PKG"
-echo "This package works on both Apple Silicon and Intel Macs (data-only keyboard bundle)."
+echo "Built for current macOS releases with Apple Silicon as primary target."
 
 if [[ -n "$SIGN_IDENTITY" ]]; then
   productsign \
