@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET="/Library/Keyboard Layouts/UniJoyMac.bundle"
+
+if [[ -d "$TARGET" ]]; then
+  rm -rf "$TARGET"
+fi
+
+exit 0

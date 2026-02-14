@@ -5,6 +5,7 @@ UniJoyMac is a macOS Bangla keyboard layout package generated from Avro's `ub.av
 It provides a positional Bangla layout for macOS Input Sources and includes:
 
 - a distributable `.bundle` for reliable discovery in System Settings
+- a `.pkg` installer for Intel and Apple Silicon Macs
 - the raw `.keylayout` XML
 - a conversion tool from Avro layout format
 - verification and installation helpers
@@ -16,6 +17,7 @@ It provides a positional Bangla layout for macOS Input Sources and includes:
 - `dist/UniJoyMac.keylayout` - generated macOS keyboard layout XML
 - `dist/UniJoyMac.icns` - icon file used by the bundle
 - `dist/UniJoyMac.bundle` - distributable keyboard layout bundle
+- `dist/UniJoyMac-Installer.pkg` - macOS installer package (built locally)
 - `dist/INSTALL.md` - step-by-step install and manual test checklist
 - `dist/verify.sh` - install and mapping verification script
 - `dist/mapping_report.md` - mapping coverage and assumptions
@@ -26,7 +28,36 @@ Tested in a modern macOS environment where custom keyboard layouts in `~/Library
 
 ## Install
 
-### User install (recommended)
+### Installer package (recommended)
+
+Build installer:
+
+```bash
+bash "tools/build_installer.sh"
+```
+
+Build and sign installer (Developer ID Installer):
+
+```bash
+UNIJOYMAC_SIGN_IDENTITY="Developer ID Installer: YOUR NAME (TEAMID)" bash "tools/build_installer.sh"
+```
+
+Then run:
+
+```bash
+open "dist/UniJoyMac-Installer.pkg"
+```
+
+The installer places `UniJoyMac.bundle` in `/Library/Keyboard Layouts`, touches the keyboard layouts directory, and refreshes input-source daemons.
+When signing is enabled, the script signs `dist/UniJoyMac-Installer.pkg` in-place and prints signature details.
+
+Find available installer identities:
+
+```bash
+security find-identity -v -p basic
+```
+
+### User install (manual)
 
 ```bash
 mkdir -p "$HOME/Library/Keyboard Layouts"
@@ -38,7 +69,7 @@ Then add the input source from:
 
 `System Settings -> Keyboard -> Input Sources -> + -> Others -> UniJoyMac`
 
-### System-wide install
+### System-wide install (manual)
 
 ```bash
 sudo mkdir -p "/Library/Keyboard Layouts"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET_DIR="/Library/Keyboard Layouts"
+
+/usr/bin/touch "$TARGET_DIR"
+
+# Refresh relevant daemons so the new layout is picked up sooner.
+/usr/bin/killall TextInputMenuAgent >/dev/null 2>&1 || true
+/usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+
+echo "UniJoyMac installed to $TARGET_DIR"
+echo "If it does not appear immediately, log out and log back in."
+
+exit 0

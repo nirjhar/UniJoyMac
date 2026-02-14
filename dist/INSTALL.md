@@ -3,9 +3,26 @@
 This package contains:
 
 - `UniJoyMac.bundle` (recommended)
+- `UniJoyMac-Installer.pkg` (recommended if available)
 - `UniJoyMac.keylayout` (raw XML layout)
 - `UniJoyMac.icns` (bundle icon)
 - `verify.sh` (post-install verification)
+
+## Recommended install via `.pkg`
+
+If `UniJoyMac-Installer.pkg` is present:
+
+```bash
+open "dist/UniJoyMac-Installer.pkg"
+```
+
+The installer installs to `/Library/Keyboard Layouts/`, refreshes keyboard layout discovery, and works on both Apple Silicon and Intel Macs.
+
+To build a signed package before sharing:
+
+```bash
+UNIJOYMAC_SIGN_IDENTITY="Developer ID Installer: YOUR NAME (TEAMID)" bash "tools/build_installer.sh"
+```
 
 ## User install (current user)
 
