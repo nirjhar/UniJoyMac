@@ -104,6 +104,6 @@ fi
 echo
 echo "If the layout is still not visible in Input Sources:"
 echo "1) Run: touch \"$TARGET_DIR\""
-echo "2) Log out and back in"
-echo "3) Open System Settings -> Keyboard -> Input Sources -> + -> Others"
+echo "2) Restart macOS (preferred) or log out and back in"
+echo "3) Open System Settings -> Keyboard -> Input Sources -> + -> Others or Bengali"
 echo "Verification complete."

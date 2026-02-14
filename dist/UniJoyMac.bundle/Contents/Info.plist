@@ -28,12 +28,12 @@
     <string>pro.lonesock.keyboardlayout.unijoymac</string>
     <key>TISInputSourceLanguages</key>
     <array>
-      <string>bn</string>
+      <string>bn-BD</string>
     </array>
     <key>TISInputSourceType</key>
     <string>TISTypeKeyboardLayout</string>
     <key>TISIntendedLanguage</key>
-    <string>bn</string>
+    <string>bn-BD</string>
     <key>TISLocalizedName</key>
     <string>UniJoyMac</string>
   </dict>

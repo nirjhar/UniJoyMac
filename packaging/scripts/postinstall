@@ -10,10 +10,35 @@ SYSTEM_BUNDLE="$TARGET_DIR/$BUNDLE_NAME"
 SYSTEM_KEYLAYOUT="$TARGET_DIR/$KEYLAYOUT_NAME"
 SYSTEM_ICON="$TARGET_DIR/$ICON_NAME"
 
+clear_layout_xattrs() {
+  local target="$1"
+  /usr/bin/xattr -dr com.apple.quarantine "$target" >/dev/null 2>&1 || true
+  /usr/bin/xattr -dr com.apple.provenance "$target" >/dev/null 2>&1 || true
+}
+
+refresh_layout_discovery() {
+  local user_uid="$1"
+  local user_layout_dir="$2"
+
+  /usr/bin/touch "$TARGET_DIR" >/dev/null 2>&1 || true
+  /usr/bin/touch "$user_layout_dir" >/dev/null 2>&1 || true
+
+  /bin/launchctl asuser "$user_uid" /usr/bin/killall TextInputMenuAgent >/dev/null 2>&1 || true
+  /bin/launchctl asuser "$user_uid" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+  /usr/bin/killall TextInputMenuAgent >/dev/null 2>&1 || true
+  /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+
+  /bin/launchctl asuser "$user_uid" /bin/launchctl kickstart -k "gui/$user_uid/com.apple.TextInputMenuAgent" >/dev/null 2>&1 || true
+}
+
 /usr/bin/touch "$TARGET_DIR"
+clear_layout_xattrs "$SYSTEM_BUNDLE"
+clear_layout_xattrs "$SYSTEM_KEYLAYOUT"
+clear_layout_xattrs "$SYSTEM_ICON"
 
 CONSOLE_USER="$(/usr/bin/stat -f%Su /dev/console 2>/dev/null || true)"
 if [[ -n "$CONSOLE_USER" && "$CONSOLE_USER" != "root" ]]; then
+  USER_LAYOUT_DIR=""
   USER_HOME="$(/usr/bin/dscl . -read "/Users/$CONSOLE_USER" NFSHomeDirectory 2>/dev/null | /usr/bin/awk '{print $2}')"
   if [[ -n "$USER_HOME" ]]; then
     USER_LAYOUT_DIR="$USER_HOME/Library/Keyboard Layouts"
@@ -39,21 +64,26 @@ if [[ -n "$CONSOLE_USER" && "$CONSOLE_USER" != "root" ]]; then
     if [[ -d "$SYSTEM_BUNDLE" ]]; then
       COPYFILE_DISABLE=1 /usr/bin/ditto --norsrc "$SYSTEM_BUNDLE" "$USER_BUNDLE"
     fi
+    clear_layout_xattrs "$USER_BUNDLE"
+    clear_layout_xattrs "$USER_KEYLAYOUT"
+    clear_layout_xattrs "$USER_ICON"
     /usr/sbin/chown -R "$CONSOLE_USER":staff "$USER_LAYOUT_DIR" >/dev/null 2>&1 || true
     /usr/bin/touch "$USER_LAYOUT_DIR"
   fi
 
   USER_UID="$(/usr/bin/id -u "$CONSOLE_USER")"
-  /bin/launchctl asuser "$USER_UID" /usr/bin/killall TextInputMenuAgent >/dev/null 2>&1 || true
-  /bin/launchctl asuser "$USER_UID" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
-  /bin/launchctl asuser "$USER_UID" /bin/launchctl kickstart -k "gui/$USER_UID/com.apple.TextInputMenuAgent" >/dev/null 2>&1 || true
+  if [[ -n "$USER_LAYOUT_DIR" ]]; then
+    refresh_layout_discovery "$USER_UID" "$USER_LAYOUT_DIR"
+  fi
 
   LOGOUT_DIALOG_RESULT="$(/bin/launchctl asuser "$USER_UID" /usr/bin/osascript <<'APPLESCRIPT' 2>/dev/null || true
-display dialog "UniJoyMac was installed successfully.\n\nPlease save your work before continuing.\n\nmacOS usually requires logging out and back in before a new keyboard layout appears in Input Sources.\n\nLog out now?" buttons {"Later", "Log Out Now"} default button "Log Out Now" with icon note giving up after 45
+display dialog "UniJoyMac was installed successfully.\n\nPlease save your work before continuing.\n\nOn newer macOS versions, a full restart is the most reliable way to make a new custom keyboard layout appear in Input Sources.\n\nRestart now?" buttons {"Later", "Log Out Now", "Restart Now"} default button "Restart Now" with icon note giving up after 60
 APPLESCRIPT
 )"
 
-  if [[ "$LOGOUT_DIALOG_RESULT" == *"button returned:Log Out Now"* ]] || [[ "$LOGOUT_DIALOG_RESULT" == *"gave up:true"* ]]; then
+  if [[ "$LOGOUT_DIALOG_RESULT" == *"button returned:Restart Now"* ]]; then
+    /bin/launchctl asuser "$USER_UID" /usr/bin/osascript -e 'tell application "System Events" to restart' >/dev/null 2>&1 || true
+  elif [[ "$LOGOUT_DIALOG_RESULT" == *"button returned:Log Out Now"* ]]; then
     /bin/launchctl asuser "$USER_UID" /usr/bin/osascript -e 'tell application "System Events" to log out' >/dev/null 2>&1 || true
   fi
 fi
@@ -61,6 +91,6 @@ fi
 /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
 
 echo "UniJoyMac installed to $TARGET_DIR"
-echo "A logout prompt was shown to refresh Input Sources."
+echo "A restart/logout prompt was shown to refresh Input Sources."
 
 exit 0
