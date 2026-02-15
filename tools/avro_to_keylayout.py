@@ -69,106 +69,6 @@ STATE_BY_AVRO_SUFFIX = {
 
 MODIFIER_ORDER = ["normal", "shift", "option", "option_shift"]
 
-COMMAND_OUTPUT_BY_KEY = {
-    "OEM3": "`",
-    "1": "1",
-    "2": "2",
-    "3": "3",
-    "4": "4",
-    "5": "5",
-    "6": "6",
-    "7": "7",
-    "8": "8",
-    "9": "9",
-    "0": "0",
-    "MINUS": "-",
-    "PLUS": "=",
-    "Q": "q",
-    "W": "w",
-    "E": "e",
-    "R": "r",
-    "T": "t",
-    "Y": "y",
-    "U": "u",
-    "I": "i",
-    "O": "o",
-    "P": "p",
-    "OEM4": "[",
-    "OEM6": "]",
-    "OEM5": "\\",
-    "A": "a",
-    "S": "s",
-    "D": "d",
-    "F": "f",
-    "G": "g",
-    "H": "h",
-    "J": "j",
-    "K": "k",
-    "L": "l",
-    "OEM1": ";",
-    "OEM7": "'",
-    "Z": "z",
-    "X": "x",
-    "C": "c",
-    "V": "v",
-    "B": "b",
-    "N": "n",
-    "M": "m",
-    "COMMA": ",",
-    "PERIOD": ".",
-    "OEM2": "/",
-}
-
-SHIFTED_COMMAND_OUTPUT_BY_KEY = {
-    "OEM3": "~",
-    "1": "!",
-    "2": "@",
-    "3": "#",
-    "4": "$",
-    "5": "%",
-    "6": "^",
-    "7": "&",
-    "8": "*",
-    "9": "(",
-    "0": ")",
-    "MINUS": "_",
-    "PLUS": "+",
-    "Q": "Q",
-    "W": "W",
-    "E": "E",
-    "R": "R",
-    "T": "T",
-    "Y": "Y",
-    "U": "U",
-    "I": "I",
-    "O": "O",
-    "P": "P",
-    "OEM4": "{",
-    "OEM6": "}",
-    "OEM5": "|",
-    "A": "A",
-    "S": "S",
-    "D": "D",
-    "F": "F",
-    "G": "G",
-    "H": "H",
-    "J": "J",
-    "K": "K",
-    "L": "L",
-    "OEM1": ":",
-    "OEM7": '"',
-    "Z": "Z",
-    "X": "X",
-    "C": "C",
-    "V": "V",
-    "B": "B",
-    "N": "N",
-    "M": "M",
-    "COMMA": "<",
-    "PERIOD": ">",
-    "OEM2": "?",
-}
-
 # UniJoy-style state machine for Bengali virama and dependent vowels.
 # This improves conjunct behavior and allows typing independent vowels by
 # pressing virama then the corresponding vowel sign.
@@ -202,15 +102,44 @@ ACTION_OUTPUT_BY_ID = {
 }
 ACTION_OUTPUTS = set(ACTION_ID_BY_OUTPUT)
 
+# PUA sentinel for U+007F (DEL / forward-delete on Mac).  Python's
+# ElementTree cannot serialize control characters, so we use a Private Use
+# Area code point as a placeholder and replace it with the numeric character
+# reference &#x007F; after serialization.  Mac keyboards send 0x7F (DEL) for
+# the Delete/Backspace key, not 0x08 (BS).
+_BACKSPACE_SENTINEL = "\uE000"
+
 # Non-character keys that should emit control characters in custom layouts.
-# Key code 51 (delete/backspace) is intentionally omitted: macOS handles it
-# natively, and U+0008 is not a legal XML 1.0 character — its presence causes
-# macOS to silently reject the entire keylayout file.
 SPECIAL_KEYS = (
     {"code": 36, "output": "\r"},
     {"code": 48, "output": "\t"},
     {"code": 49, "output": " "},
+    {"code": 51, "output": _BACKSPACE_SENTINEL},
 )
+
+# US QWERTY output by Avro key name — used for the Command modifier keymaps
+# so that Cmd+C, Cmd+V, Cmd+Z etc. send the correct ASCII character.
+COMMAND_OUTPUT_BY_KEY = {
+    "OEM3": "`", "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6",
+    "7": "7", "8": "8", "9": "9", "0": "0", "MINUS": "-", "PLUS": "=",
+    "Q": "q", "W": "w", "E": "e", "R": "r", "T": "t", "Y": "y", "U": "u",
+    "I": "i", "O": "o", "P": "p", "OEM4": "[", "OEM6": "]", "OEM5": "\\",
+    "A": "a", "S": "s", "D": "d", "F": "f", "G": "g", "H": "h", "J": "j",
+    "K": "k", "L": "l", "OEM1": ";", "OEM7": "'",
+    "Z": "z", "X": "x", "C": "c", "V": "v", "B": "b", "N": "n", "M": "m",
+    "COMMA": ",", "PERIOD": ".", "OEM2": "/",
+}
+
+SHIFTED_COMMAND_OUTPUT_BY_KEY = {
+    "OEM3": "~", "1": "!", "2": "@", "3": "#", "4": "$", "5": "%", "6": "^",
+    "7": "&", "8": "*", "9": "(", "0": ")", "MINUS": "_", "PLUS": "+",
+    "Q": "Q", "W": "W", "E": "E", "R": "R", "T": "T", "Y": "Y", "U": "U",
+    "I": "I", "O": "O", "P": "P", "OEM4": "{", "OEM6": "}", "OEM5": "|",
+    "A": "A", "S": "S", "D": "D", "F": "F", "G": "G", "H": "H", "J": "J",
+    "K": "K", "L": "L", "OEM1": ":", "OEM7": '"',
+    "Z": "Z", "X": "X", "C": "C", "V": "V", "B": "B", "N": "N", "M": "M",
+    "COMMA": "<", "PERIOD": ">", "OEM2": "?",
+}
 
 
 def parse_avro_keydata(avro_path: Path) -> dict[str, dict[str, str]]:
@@ -281,7 +210,11 @@ def build_keylayout_xml(
     )
 
     layouts = ET.SubElement(keyboard, "layouts")
-    ET.SubElement(layouts, "layout", {"first": "0", "last": "0", "mapSet": "mapset_0", "modifiers": "modifiers_0"})
+    # Cover all ANSI keyboard types (0–17) and JIS (18–18), matching the
+    # structure used by Probhat, Armenian Phonetic, and other working
+    # third-party keyboard layouts on macOS.
+    ET.SubElement(layouts, "layout", {"first": "0", "last": "17", "mapSet": "mapset_0", "modifiers": "modifiers_0"})
+    ET.SubElement(layouts, "layout", {"first": "18", "last": "18", "mapSet": "mapset_0", "modifiers": "modifiers_0"})
 
     modifier_map = ET.SubElement(keyboard, "modifierMap", {"id": "modifiers_0", "defaultIndex": "0"})
     ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "0"})
@@ -292,18 +225,25 @@ def build_keylayout_xml(
     ET.SubElement(keymap_select_2, "modifier", {"keys": "anyOption"})
     keymap_select_3 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "3"})
     ET.SubElement(keymap_select_3, "modifier", {"keys": "anyShift anyOption"})
+    # Command modifier → QWERTY passthrough (indices 4–7).  Each combination
+    # of Shift/Option with Command gets its own keymap so that macOS 26 can
+    # parse the modifierMap correctly (optional-suffix syntax with anyCommand
+    # causes silent rejection).  The command keymaps use only plain output
+    # attributes (no action references) so they do not interfere with the
+    # dead-key state machine.
     keymap_select_4 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "4"})
-    ET.SubElement(keymap_select_4, "modifier", {"keys": "anyCommand"})
+    ET.SubElement(keymap_select_4, "modifier", {"keys": "command"})
     keymap_select_5 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "5"})
-    ET.SubElement(keymap_select_5, "modifier", {"keys": "anyShift anyCommand"})
+    ET.SubElement(keymap_select_5, "modifier", {"keys": "anyShift command"})
     keymap_select_6 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "6"})
-    ET.SubElement(keymap_select_6, "modifier", {"keys": "anyOption anyCommand"})
+    ET.SubElement(keymap_select_6, "modifier", {"keys": "anyOption command"})
     keymap_select_7 = ET.SubElement(modifier_map, "keyMapSelect", {"mapIndex": "7"})
-    ET.SubElement(keymap_select_7, "modifier", {"keys": "anyShift anyOption anyCommand"})
+    ET.SubElement(keymap_select_7, "modifier", {"keys": "anyShift anyOption command"})
 
     key_map_set = ET.SubElement(keyboard, "keyMapSet", {"id": "mapset_0"})
     sorted_keys = sorted(KEYCODE_BY_AVRO_KEY.items(), key=lambda item: item[1])
 
+    # Bengali keymaps (indices 0–3).
     for index, state in enumerate(MODIFIER_ORDER):
         key_map = ET.SubElement(key_map_set, "keyMap", {"index": str(index)})
         for avro_key, keycode in sorted_keys:
@@ -318,6 +258,7 @@ def build_keylayout_xml(
             attrs = {k: str(v) for k, v in special_key.items()}
             ET.SubElement(key_map, "key", attrs)
 
+    # Command keymaps (indices 4–7) — US QWERTY output, no actions/dead-keys.
     for index, command_map in ((4, COMMAND_OUTPUT_BY_KEY), (5, SHIFTED_COMMAND_OUTPUT_BY_KEY), (6, COMMAND_OUTPUT_BY_KEY), (7, SHIFTED_COMMAND_OUTPUT_BY_KEY)):
         key_map = ET.SubElement(key_map_set, "keyMap", {"index": str(index)})
         for avro_key, keycode in sorted_keys:
@@ -341,8 +282,14 @@ def build_keylayout_xml(
 
     indent_xml(keyboard)
     xml_body = ET.tostring(keyboard, encoding="unicode")
+    # Replace PUA sentinel with the backspace character reference (0x08).
+    # All working third-party layouts (Probhat, Armenian, Romanian) use this.
+    xml_body = xml_body.replace(_BACKSPACE_SENTINEL, "&#x0008;")
+    # XML 1.1 is required so that &#x0008; (backspace) is a legal character
+    # reference.  XML 1.0 forbids control chars below U+0020 (except tab/CR/LF)
+    # and macOS silently strips them during parsing, breaking key code 51.
     header = (
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<?xml version="1.1" encoding="UTF-8"?>\n'
         '<!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">\n'
     )
     return header + xml_body + "\n"

@@ -52,8 +52,15 @@ else
 fi
 
 if command -v xmllint >/dev/null 2>&1; then
-  xmllint --noout "$KEYLAYOUT_PATH"
-  xmllint --noout --valid "$KEYLAYOUT_PATH"
+  # The keylayout uses XML 1.1 (required for &#x0008; backspace character
+  # reference).  xmllint only supports XML 1.0, so we downgrade the
+  # declaration and substitute &#x0008; with &#x0009; for validation.
+  TMPXML="$(mktemp)"
+  sed -e 's/version="1\.1"/version="1.0"/' \
+      -e 's/\&#x0008;/\&#x0009;/g' "$KEYLAYOUT_PATH" > "$TMPXML"
+  xmllint --noout "$TMPXML"
+  xmllint --noout --valid "$TMPXML"
+  rm -f "$TMPXML"
   echo "- keylayout XML and DTD validation passed"
 else
   echo "WARN: xmllint not available, skipping XML validation"
@@ -63,7 +70,12 @@ python3 - <<PY
 import xml.etree.ElementTree as ET
 
 keylayout_path = """$KEYLAYOUT_PATH"""
-root = ET.parse(keylayout_path).getroot()
+# The keylayout uses XML 1.1 for &#x0008; support.  Python's ET only
+# handles XML 1.0, so downgrade the declaration and substitute the
+# backspace char ref for parsing.
+raw = open(keylayout_path, 'r', encoding='utf-8').read()
+safe = raw.replace('version="1.1"', 'version="1.0"').replace('&#x0008;', '&#x0009;')
+root = ET.fromstring(safe)
 
 maps = {}
 actions = {}

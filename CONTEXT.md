@@ -8,144 +8,101 @@ Convert Avro keyboard layout source (`ub.avrolayout`) into a macOS custom keyboa
 
 - System Settings -> Keyboard -> Input Sources -> Others
 
-Deliverables are generated under `dist/` as:
-
-- `UniJoyMac.keylayout`
-- `UniJoyMac.icns`
-- `UniJoyMac.bundle`
-- `UniJoyMac-Installer.pkg`
-- `INSTALL.md`
-- `verify.sh`
-- `mapping_report.md`
-
 ## Current architecture
 
 - Source format: `ub.avrolayout` (Avro keyboard XML-like format)
 - Converter: `tools/avro_to_keylayout.py`
-- Output layout: `dist/UniJoyMac.keylayout`
+- Output layout: `dist/UniJoyMac.keylayout` (XML 1.1)
 - Bundle metadata: `dist/UniJoyMac.bundle/Contents/Info.plist`
+- Language: `bn` (Bengali, matches Apple's Bangla keyboards)
 
-### Why custom parsing was used
+### Keylayout structure (8 keymaps)
 
-`ub.avrolayout` is XML-like but not strictly XML for generic parsers because it contains numeric tag names, for example:
+- Index 0: Normal (Bengali) — `modifier keys=""`
+- Index 1: Shift (Bengali) — `modifier keys="anyShift"`
+- Index 2: Option/AltGr (Bengali) — `modifier keys="anyOption"`
+- Index 3: Shift+Option (Bengali) — `modifier keys="anyShift anyOption"`
+- Index 4: Command (QWERTY) — `modifier keys="command"`
+- Index 5: Shift+Command (QWERTY shifted) — `modifier keys="anyShift command"`
+- Index 6: Option+Command (QWERTY) — `modifier keys="anyOption command"`
+- Index 7: Shift+Option+Command (QWERTY shifted) — `modifier keys="anyShift anyOption command"`
 
-- `<1_Normal>...</1_Normal>`
+### Layout element
 
-`xml.etree.ElementTree.parse()` fails on that. The converter therefore:
+```xml
+<layout first="0" last="17" mapSet="mapset_0" modifiers="modifiers_0" />
+<layout first="18" last="18" mapSet="mapset_0" modifiers="modifiers_0" />
+```
 
-1. Reads raw file text
-2. Extracts `<KeyData>...</KeyData>` with regex
-3. Extracts `<KEY_(Normal|Shift|AltGr|ShiftAltGr)>value</...>` fields with regex
-4. Preserves Avro source code points exactly (no NFC normalization) so letters like ড়/ঢ়/য় stay in their source form
+Covers all ANSI keyboard types (0-17) and JIS (18), matching working third-party layouts.
 
-## Mapping model
+### Key code 51 (backspace) and `&#x0008;`
 
-Implemented layers (8 keyMaps total):
+Key code 51 is mapped to `&#x0008;` (U+0008, BS) in all 8 keymaps.
 
-- `Normal` -> macOS no modifier (index 0)
-- `Shift` -> macOS Shift (index 1)
-- `AltGr` -> macOS Option (index 2)
-- `ShiftAltGr` -> macOS Option+Shift (index 3)
-- `Command` -> passes through US QWERTY so Cmd+C/V/X etc. work (indices 4-7)
+- XML 1.1 declaration is required: `&#x0008;` is not a legal XML 1.0 character reference
+- Python ET can't serialize U+0008; uses PUA sentinel U+E000, replaced after serialization
+- `verify.sh` downgrades XML 1.1→1.0 and substitutes `&#x0008;`→`&#x0009;` for xmllint/ET validation
 
-Virama state machine: the converter generates `<actions>` and `<terminators>` elements implementing a UniJoy-style virama (`্`) state. Pressing virama enters `state_virama`; pressing a dependent vowel sign in that state emits the corresponding independent vowel (e.g. া→আ, ি→ই).
+### Command keymap rules
 
-Key coverage (main ANSI set):
+- Command keymaps use ONLY `output` attributes, NEVER `action`
+- Must use `command` (not `anyCommand`) — macOS 26.3 silently rejects `anyCommand`
+- `anyShift` and `anyOption` still work fine with `command`
 
-- Letters: `A-Z`
-- Digits: `0-9`
-- OEM/punctuation: `` OEM3 MINUS PLUS OEM4 OEM6 OEM5 OEM1 OEM7 COMMA PERIOD OEM2 ``
+### Virama dead-key state machine
 
-Numpad entries (`Num1`, etc.) are present in source but currently not emitted in `.keylayout`.
+The converter generates `<actions>` and `<terminators>` elements implementing a UniJoy-style virama (`্`) state. Pressing virama enters `state_virama`; pressing a dependent vowel sign in that state emits the corresponding independent vowel.
 
 ## Important IDs and names
 
 - Display/layout name: `UniJoyMac`
-- Bundle id in plist: `pro.lonesock.keyboardlayout.unijoymac`
-- Keyboard ID in `.keylayout`: `-28676`
-- Keyboard group in `.keylayout`: `126`
-- Plist layout info key: `KLInfo_UniJoyMac` (must match the `name` attribute in `.keylayout`)
+- Bundle id: `pro.lonesock.keyboardlayout.unijoymac`
+- Keyboard ID: `-28676`
+- Keyboard group: `126`
+- Plist layout info key: `KLInfo_UniJoyMac` (must match `name` attribute in keylayout)
+- Language: `bn` (Bengali)
 
-## Install behavior
+## macOS 26.3 compatibility findings
 
-Preferred install path:
+Confirmed by bisection testing (2026-02-15):
 
-- Open `dist/UniJoyMac-Installer.pkg`
+1. **`anyCommand` is silently rejected.** A keylayout containing `anyCommand` in any modifier key will not appear in Input Sources. Use `command` instead.
+2. **XML 1.1 works fine.** Previous belief that XML 1.1 was rejected was wrong — `anyCommand` was the actual cause.
+3. **`&#x0008;` works with XML 1.1.** Previous belief that `&#x0008;` was rejected was wrong — `anyCommand` was the actual cause.
+4. **`first="0" last="0"` is too restrictive.** Use `first="0" last="17"` for ANSI + `first="18" last="18"` for JIS.
+5. **Rejection is completely silent.** No Console logs, no errors. Keyboard just doesn't appear.
+6. **Force TIS rescan:** `killall TextInputMenuAgent cfprefsd` (no restart needed for testing).
 
-Installer behavior:
+## Known issue: Backspace in Microsoft Word
 
-- installs bundle only to `/Library/Keyboard Layouts/UniJoyMac.bundle`
-- removes standalone `.keylayout` and `.icns` from `/Library/Keyboard Layouts/` to prevent duplicate Input Sources entries
-- removes user-level copies from `~/Library/Keyboard Layouts/` so only the system bundle is active
-- clears extended attributes (`com.apple.quarantine`, `com.apple.provenance`) on installed keyboard files
-- refreshes keyboard discovery (`touch` + `TextInputMenuAgent`/`cfprefsd` restart)
-- prompts user to save work and choose **Restart Now**, **Log Out Now**, or **Later**
-- restart is now the recommended refresh action on recent macOS versions
+Backspace from third-party `.keylayout` files does not work in Microsoft Word on macOS. This affects ALL third-party keylayouts, not just UniJoyMac.
 
-System install path:
+Tested approaches (all failed in Word):
+- `output="&#x0008;"` (direct output)
+- `output="&#x007F;"` (DEL character)
+- `action` element with `&#x0008;` output
+- No key code 51 mapping at all
 
-- `/Library/Keyboard Layouts/UniJoyMac.bundle` (bundle only — no standalone files)
+Root cause: macOS TSM routes key code 51 from third-party keylayouts through `insertText:` with U+0008. Word doesn't interpret this as a backspace command. System keylayouts use a different path that Word handles correctly.
 
-Supported installation flow is installer-only (`UniJoyMac-Installer.pkg`), followed by restart (preferred) or logout/login.
-
-## Verification behavior
-
-Script: `dist/verify.sh`
-
-Checks:
-
-- bundle exists
-- keylayout exists in bundle resources
-- plist lint via `plutil`
-- keylayout XML syntax and DTD validation via `xmllint --valid`
-- sample key mapping assertions across 4 layers
-
-If verify fails:
-
-1. Confirm file names in bundle match expected `UniJoyMac.*`
-2. Confirm `Info.plist` keys point to `UniJoyMac.icns`
-3. Confirm `dist/UniJoyMac.keylayout` is copied into bundle resources
-4. Reinstall and touch keyboard layouts directory
-
-If verify passes but layout is not visible in Input Sources:
-
-1. Restart macOS (preferred on newer versions)
-2. Check both categories in Input Sources picker: `Others` and `Bengali`
-3. Re-run installer to refresh both system and user layout directories
-
-## Known limitations
-
-- Static positional mapping only
-- No phonetic/dynamic composition engine in native `.keylayout`
-- Option and Option+Shift are sparse because source layout has many empty values in those layers
-- Key code 51 (delete/backspace) is omitted from the keylayout — macOS handles it natively, and U+0008 (BS) is not valid XML 1.0 (its presence caused macOS to silently reject the entire keylayout file)
-- The `Info.plist` key `KLInfo_<name>` must use the layout name (e.g. `KLInfo_UniJoyMac`), not a numeric index — macOS 26 (Tahoe) does not discover the bundle with `KLInfo_0`
+Apple's Bangla QWERTY (system keylayout) produces identical UCKeyTranslate output (U+0008 for key code 51) but works in Word — confirming the difference is in the event delivery path, not the character.
 
 ## Fast debug commands
 
-Regenerate layout:
-
 ```bash
-python3 "tools/avro_to_keylayout.py" "ub.avrolayout" "dist/UniJoyMac.keylayout" --layout-name "UniJoyMac"
-```
+# Full rebuild + install + test cycle
+python3 tools/avro_to_keylayout.py ub.avrolayout dist/UniJoyMac.keylayout --layout-name UniJoyMac
+cp dist/UniJoyMac.keylayout dist/UniJoyMac.bundle/Contents/Resources/UniJoyMac.keylayout
+sudo cp dist/UniJoyMac.keylayout "/Library/Keyboard Layouts/UniJoyMac.bundle/Contents/Resources/UniJoyMac.keylayout"
+sudo touch "/Library/Keyboard Layouts/"
+killall TextInputMenuAgent cfprefsd
+sleep 3
+swift /tmp/list_keyboards.swift | grep -i unijoy
 
-Rebuild bundle resources after regeneration:
+# Validate keylayout (substitute control chars for strict parsers)
+TMPXML="$(mktemp)" && sed -e 's/version="1\.1"/version="1.0"/' -e 's/\&#x0008;/\&#x0009;/g' dist/UniJoyMac.keylayout > "$TMPXML" && xmllint --noout --valid "$TMPXML" && rm -f "$TMPXML"
 
-```bash
-cp "dist/UniJoyMac.keylayout" "dist/UniJoyMac.bundle/Contents/Resources/UniJoyMac.keylayout"
-cp "dist/UniJoyMac.icns" "dist/UniJoyMac.bundle/Contents/Resources/UniJoyMac.icns"
-```
-
-Reinstall with installer and verify:
-
-```bash
-bash "tools/build_installer.sh"
-open "dist/UniJoyMac-Installer.pkg"
-bash "dist/verify.sh"
-```
-
-Validate keylayout XML manually:
-
-```bash
-xmllint --noout --valid "dist/UniJoyMac.keylayout"
+# Check UCKeyTranslate output for key code 51
+swift /tmp/check_unijoy_delete.swift
 ```

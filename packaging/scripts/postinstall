@@ -41,6 +41,10 @@ if [[ -f "$SYSTEM_ICON" ]]; then
   rm -f "$SYSTEM_ICON"
 fi
 
+# The pkg installer may ad-hoc sign the bundle; remove the signature so
+# macOS 26 does not reject the layout during discovery.
+rm -rf "$SYSTEM_BUNDLE/Contents/_CodeSignature" >/dev/null 2>&1 || true
+
 clear_layout_xattrs "$SYSTEM_BUNDLE"
 
 CONSOLE_USER="$(/usr/bin/stat -f%Su /dev/console 2>/dev/null || true)"

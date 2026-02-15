@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">
 <keyboard group="126" id="-28676" name="UniJoyMac" maxout="4">
   <layouts>
-    <layout first="0" last="0" mapSet="mapset_0" modifiers="modifiers_0" />
+    <layout first="0" last="17" mapSet="mapset_0" modifiers="modifiers_0" />
+    <layout first="18" last="18" mapSet="mapset_0" modifiers="modifiers_0" />
   </layouts>
   <modifierMap id="modifiers_0" defaultIndex="0">
     <keyMapSelect mapIndex="0">
@@ -18,16 +19,16 @@
       <modifier keys="anyShift anyOption" />
     </keyMapSelect>
     <keyMapSelect mapIndex="4">
-      <modifier keys="anyCommand" />
+      <modifier keys="command" />
     </keyMapSelect>
     <keyMapSelect mapIndex="5">
-      <modifier keys="anyShift anyCommand" />
+      <modifier keys="anyShift command" />
     </keyMapSelect>
     <keyMapSelect mapIndex="6">
-      <modifier keys="anyOption anyCommand" />
+      <modifier keys="anyOption command" />
     </keyMapSelect>
     <keyMapSelect mapIndex="7">
-      <modifier keys="anyShift anyOption anyCommand" />
+      <modifier keys="anyShift anyOption command" />
     </keyMapSelect>
   </modifierMap>
   <keyMapSet id="mapset_0">
@@ -82,6 +83,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="1">
       <key code="0" output="র্" />
@@ -134,6 +136,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="2">
       <key code="0" output="ঋ" />
@@ -186,6 +189,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="3">
       <key code="0" output="" />
@@ -238,6 +242,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="4">
       <key code="0" output="a" />
@@ -290,6 +295,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="5">
       <key code="0" output="A" />
@@ -342,6 +348,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="6">
       <key code="0" output="a" />
@@ -394,6 +401,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
     <keyMap index="7">
       <key code="0" output="A" />
@@ -446,6 +454,7 @@
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
       <key code="49" output=" " />
+      <key code="51" output="&#x0008;" />
     </keyMap>
   </keyMapSet>
   <actions>
