@@ -83,32 +83,7 @@ bash "dist/verify.sh" --system
 
 Checks bundle presence, Info.plist validity, XML/DTD validation, and sample key mappings.
 
-## Known issues
-
-### Backspace does not work in some apps (Microsoft Word, WhatsApp Desktop, etc.)
-
-Backspace works in all native macOS apps (TextEdit, Safari, Notes, etc.) but **not in Microsoft Word, WhatsApp Desktop**, and potentially other non-native apps. This is a limitation of how these apps handle key events from third-party `.keylayout` files on macOS.
-
-**Root cause:** macOS routes key code 51 (backspace) from third-party keylayouts through the text input `insertText:` path with U+0008. These apps' text engines do not interpret this as a delete-backward command. Apple's built-in keyboard layouts use a different system-level path that these apps handle correctly.
-
-This affects **all** third-party `.keylayout` files in these apps, not just UniJoyMac. Verified by testing a minimal keylayout containing only 3 keys + backspace.
-
-**Workarounds:**
-- Use **fn+Delete** (forward delete)
-- Switch to Apple's **Bangla QWERTY** keyboard for editing in affected apps
-- Type in TextEdit and paste into the affected app
-
-**Help wanted:** If you know how to make backspace work in these apps with a third-party `.keylayout` (without converting to a full Input Method), please open an issue or PR. See [Contributing](#contributing).
-
-### macOS 26.3 compatibility notes
-
-macOS 26.3 introduced stricter validation for third-party keyboard layouts:
-
-- **`anyCommand` modifier rejected:** Using `anyCommand` in modifier keymaps causes the entire keylayout to be silently rejected. Use `command` instead. (`anyShift` and `anyOption` still work.)
-- **XML 1.1 required for backspace:** The backspace character `&#x0008;` is invalid in XML 1.0. XML 1.1 is required to include it as a legal character reference.
-- **Silent rejection:** macOS provides no error messages when rejecting a keylayout. The keyboard simply doesn't appear in Input Sources.
-
-### Other limitations
+## Notes
 
 - Static positional mapping only (no phonetic/dynamic composition)
 - Option and Option+Shift layers are sparse (source layout has many empty values)
@@ -131,14 +106,8 @@ packaging/scripts/postinstall    # Installer post-install script
 
 Contributions are welcome, especially for:
 
-1. **Fixing backspace in non-native apps (Word, WhatsApp Desktop, etc.)** — The key challenge is making these apps treat key code 51 from a third-party keylayout as a backspace command rather than text input. Potential approaches:
-   - A lightweight Input Method wrapper around the keylayout
-   - A macOS service/helper that intercepts backspace events
-   - Discovering a keylayout-only solution that changes the TSM processing path
-
-2. **Additional key mappings** — Numpad keys, additional special characters
-
-3. **Testing on different macOS versions**
+1. **Additional key mappings** — Numpad keys, additional special characters
+2. **Testing on different macOS versions**
 
 Please open an issue to discuss before submitting large changes.
 
