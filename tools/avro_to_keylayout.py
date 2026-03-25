@@ -87,6 +87,14 @@ ACTION_ID_BY_OUTPUT = {
     "ৌ": "act_sign_ou",
     "ৈ": "act_sign_oi",
     VIRAMA: VIRAMA_ACTION_ID,
+    # XML-special ASCII characters must use actions because macOS's keylayout
+    # parser does not handle entity-escaped characters (&lt; &gt; &quot; or
+    # their numeric equivalents) in direct output attributes.  Routing through
+    # actions uses a different code path that works in browsers and other
+    # non-native apps.
+    '"': "act_double_quote",
+    "<": "act_less_than",
+    ">": "act_greater_than",
 }
 ACTION_OUTPUT_BY_ID = {
     "act_sign_aa": {"none": "া", VIRAMA_STATE: "আ"},
@@ -99,6 +107,9 @@ ACTION_OUTPUT_BY_ID = {
     "act_sign_o": {"none": "ো", VIRAMA_STATE: "ও"},
     "act_sign_ou": {"none": "ৌ", VIRAMA_STATE: "ঔ"},
     "act_sign_oi": {"none": "ৈ", VIRAMA_STATE: "ঐ"},
+    "act_double_quote": {"none": '"'},
+    "act_less_than": {"none": "<"},
+    "act_greater_than": {"none": ">"},
 }
 ACTION_OUTPUTS = set(ACTION_ID_BY_OUTPUT)
 
@@ -108,6 +119,27 @@ ACTION_OUTPUTS = set(ACTION_ID_BY_OUTPUT)
 # reference &#x007F; after serialization.  Mac keyboards send 0x7F (DEL) for
 # the Delete/Backspace key, not 0x08 (BS).
 _BACKSPACE_SENTINEL = "\uE000"
+
+# PUA sentinels for XML-special characters.  macOS's keylayout parser does
+# not handle &lt;, &gt;, &quot; or their numeric equivalents (&#x003C; etc.)
+# in output attributes.  We store PUA placeholders in the ET tree and
+# post-process them into representations the parser accepts.
+_GREATER_THAN_SENTINEL = "\uE001"
+_DOUBLE_QUOTE_SENTINEL = "\uE002"
+_LESS_THAN_SENTINEL = "\uE003"
+
+_XML_SPECIAL_SUBS = {
+    "<": _LESS_THAN_SENTINEL,
+    ">": _GREATER_THAN_SENTINEL,
+    '"': _DOUBLE_QUOTE_SENTINEL,
+}
+
+
+def _encode_xml_special(s: str) -> str:
+    """Replace XML-special characters with PUA sentinels."""
+    for char, sentinel in _XML_SPECIAL_SUBS.items():
+        s = s.replace(char, sentinel)
+    return s
 
 # Non-character keys that should emit control characters in custom layouts.
 SPECIAL_KEYS = (
@@ -252,7 +284,7 @@ def build_keylayout_xml(
             if output in ACTION_OUTPUTS:
                 attrs["action"] = ACTION_ID_BY_OUTPUT[output]
             else:
-                attrs["output"] = output
+                attrs["output"] = _encode_xml_special(output)
             ET.SubElement(key_map, "key", attrs)
         for special_key in SPECIAL_KEYS:
             attrs = {k: str(v) for k, v in special_key.items()}
@@ -262,7 +294,7 @@ def build_keylayout_xml(
     for index, command_map in ((4, COMMAND_OUTPUT_BY_KEY), (5, SHIFTED_COMMAND_OUTPUT_BY_KEY), (6, COMMAND_OUTPUT_BY_KEY), (7, SHIFTED_COMMAND_OUTPUT_BY_KEY)):
         key_map = ET.SubElement(key_map_set, "keyMap", {"index": str(index)})
         for avro_key, keycode in sorted_keys:
-            ET.SubElement(key_map, "key", {"code": str(keycode), "output": command_map[avro_key]})
+            ET.SubElement(key_map, "key", {"code": str(keycode), "output": _encode_xml_special(command_map[avro_key])})
         for special_key in SPECIAL_KEYS:
             attrs = {k: str(v) for k, v in special_key.items()}
             ET.SubElement(key_map, "key", attrs)
@@ -271,7 +303,7 @@ def build_keylayout_xml(
     for action_id, when_by_state in ACTION_OUTPUT_BY_ID.items():
         action = ET.SubElement(actions, "action", {"id": action_id})
         for state_name, out in when_by_state.items():
-            ET.SubElement(action, "when", {"state": state_name, "output": out})
+            ET.SubElement(action, "when", {"state": state_name, "output": _encode_xml_special(out)})
 
     virama_action = ET.SubElement(actions, "action", {"id": VIRAMA_ACTION_ID})
     ET.SubElement(virama_action, "when", {"state": "none", "next": VIRAMA_STATE})
@@ -285,6 +317,17 @@ def build_keylayout_xml(
     # Replace PUA sentinel with the backspace character reference (0x08).
     # All working third-party layouts (Probhat, Armenian, Romanian) use this.
     xml_body = xml_body.replace(_BACKSPACE_SENTINEL, "&#x0008;")
+    # macOS's keylayout parser does not handle XML entity escapes (&lt; etc.)
+    # or numeric character references (&#x003C; etc.) for printable ASCII
+    # characters in output attributes.  Use literal characters instead:
+    #  - > is valid unescaped in XML attribute values
+    #  - " is valid inside single-quoted XML attributes
+    #  - < must be escaped in XML; use &#x003C; as last resort
+    xml_body = xml_body.replace(_GREATER_THAN_SENTINEL, ">")
+    xml_body = xml_body.replace(
+        '"' + _DOUBLE_QUOTE_SENTINEL + '"', "'" + '"' + "'"
+    )
+    xml_body = xml_body.replace(_LESS_THAN_SENTINEL, "&#x003C;")
     # XML 1.1 is required so that &#x0008; (backspace) is a legal character
     # reference.  XML 1.0 forbids control chars below U+0020 (except tab/CR/LF)
     # and macOS silently strips them during parsing, breaking key code 51.

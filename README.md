@@ -8,7 +8,11 @@ A macOS keyboard layout for typing Bengali using the UniJoy/Bijoy positional lay
 - Virama dead-key state machine for typing independent vowels
 - Command keymaps (Cmd+C/V/Z etc. produce correct QWERTY shortcuts)
 - Backspace support via key code 51
-- Works on macOS 26 (Tahoe) and later, Intel and Apple Silicon
+## Requirements
+
+- **macOS:** macOS 26 (Tahoe) or later
+- **Architecture:** Intel (x86_64) and Apple Silicon (arm64)
+- **Keyboard:** ANSI and JIS layouts supported
 
 ## Install
 
@@ -81,20 +85,20 @@ Checks bundle presence, Info.plist validity, XML/DTD validation, and sample key 
 
 ## Known issues
 
-### Backspace does not work in Microsoft Word
+### Backspace does not work in some apps (Microsoft Word, WhatsApp Desktop, etc.)
 
-Backspace works in all native macOS apps (TextEdit, Safari, Notes, etc.) but **not in Microsoft Word**. This is a limitation of how Word handles key events from third-party `.keylayout` files on macOS.
+Backspace works in all native macOS apps (TextEdit, Safari, Notes, etc.) but **not in Microsoft Word, WhatsApp Desktop**, and potentially other non-native apps. This is a limitation of how these apps handle key events from third-party `.keylayout` files on macOS.
 
-**Root cause:** macOS routes key code 51 (backspace) from third-party keylayouts through the text input `insertText:` path with U+0008. Word's text engine does not interpret this as a delete-backward command. Apple's built-in keyboard layouts use a different system-level path that Word handles correctly.
+**Root cause:** macOS routes key code 51 (backspace) from third-party keylayouts through the text input `insertText:` path with U+0008. These apps' text engines do not interpret this as a delete-backward command. Apple's built-in keyboard layouts use a different system-level path that these apps handle correctly.
 
-This affects **all** third-party `.keylayout` files in Word, not just UniJoyMac. Verified by testing a minimal keylayout containing only 3 keys + backspace.
+This affects **all** third-party `.keylayout` files in these apps, not just UniJoyMac. Verified by testing a minimal keylayout containing only 3 keys + backspace.
 
 **Workarounds:**
-- Use **fn+Delete** (forward delete) in Word
-- Switch to Apple's **Bangla QWERTY** keyboard for editing in Word
-- Type in TextEdit and paste into Word
+- Use **fn+Delete** (forward delete)
+- Switch to Apple's **Bangla QWERTY** keyboard for editing in affected apps
+- Type in TextEdit and paste into the affected app
 
-**Help wanted:** If you know how to make backspace work in Word with a third-party `.keylayout` (without converting to a full Input Method), please open an issue or PR. See [Contributing](#contributing).
+**Help wanted:** If you know how to make backspace work in these apps with a third-party `.keylayout` (without converting to a full Input Method), please open an issue or PR. See [Contributing](#contributing).
 
 ### macOS 26.3 compatibility notes
 
@@ -127,7 +131,7 @@ packaging/scripts/postinstall    # Installer post-install script
 
 Contributions are welcome, especially for:
 
-1. **Fixing backspace in Microsoft Word** — The key challenge is making Word treat key code 51 from a third-party keylayout as a backspace command rather than text input. Potential approaches:
+1. **Fixing backspace in non-native apps (Word, WhatsApp Desktop, etc.)** — The key challenge is making these apps treat key code 51 from a third-party keylayout as a backspace command rather than text input. Potential approaches:
    - A lightweight Input Method wrapper around the keylayout
    - A macOS service/helper that intercepts backspace events
    - Discovering a keylayout-only solution that changes the TSM processing path

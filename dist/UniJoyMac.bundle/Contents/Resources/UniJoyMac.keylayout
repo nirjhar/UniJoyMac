@@ -123,15 +123,15 @@
       <key code="35" output="ঢ়" />
       <key code="37" output="ধ" />
       <key code="38" output="খ" />
-      <key code="39" output="&quot;" />
+      <key code="39" action="act_double_quote" />
       <key code="40" output="থ" />
       <key code="41" output=":" />
       <key code="42" output="ৰ" />
-      <key code="43" output="&lt;" />
+      <key code="43" action="act_less_than" />
       <key code="44" output="?" />
       <key code="45" output="ষ" />
       <key code="46" output="শ" />
-      <key code="47" output="&gt;" />
+      <key code="47" action="act_greater_than" />
       <key code="50" output="‍" />
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
@@ -335,15 +335,15 @@
       <key code="35" output="P" />
       <key code="37" output="L" />
       <key code="38" output="J" />
-      <key code="39" output="&quot;" />
+      <key code="39" output='"' />
       <key code="40" output="K" />
       <key code="41" output=":" />
       <key code="42" output="|" />
-      <key code="43" output="&lt;" />
+      <key code="43" output="&#x003C;" />
       <key code="44" output="?" />
       <key code="45" output="N" />
       <key code="46" output="M" />
-      <key code="47" output="&gt;" />
+      <key code="47" output=">" />
       <key code="50" output="~" />
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
@@ -441,15 +441,15 @@
       <key code="35" output="P" />
       <key code="37" output="L" />
       <key code="38" output="J" />
-      <key code="39" output="&quot;" />
+      <key code="39" output='"' />
       <key code="40" output="K" />
       <key code="41" output=":" />
       <key code="42" output="|" />
-      <key code="43" output="&lt;" />
+      <key code="43" output="&#x003C;" />
       <key code="44" output="?" />
       <key code="45" output="N" />
       <key code="46" output="M" />
-      <key code="47" output="&gt;" />
+      <key code="47" output=">" />
       <key code="50" output="~" />
       <key code="36" output="&#13;" />
       <key code="48" output="&#09;" />
@@ -497,6 +497,15 @@
     <action id="act_sign_oi">
       <when state="none" output="ৈ" />
       <when state="state_virama" output="ঐ" />
+    </action>
+    <action id="act_double_quote">
+      <when state="none" output='"' />
+    </action>
+    <action id="act_less_than">
+      <when state="none" output="&#x003C;" />
+    </action>
+    <action id="act_greater_than">
+      <when state="none" output=">" />
     </action>
     <action id="act_virama">
       <when state="none" next="state_virama" />
