@@ -113,4 +113,4 @@ Please open an issue to discuss before submitting large changes.
 
 ## Maintainer
 
-Lutfar Rahman Nirjhar
+Lutfar Rahman Nirjhar (nirjhar@nirjhar.com)
